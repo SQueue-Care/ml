@@ -628,16 +628,6 @@ SQueue-Care Organization (https://github.com/SQueue-Care)
 
 ---
 
-## Useful Resources
-
-- **SQueue-Care Organization**: [https://github.com/SQueue-Care](https://github.com/SQueue-Care)
-- **Project PRD**: [PRD.md](./PRD/PRD.md)
-- **Database Schema**: [Database Schema](./Database%20Schema/)
-- **Architecture Flowchart**: [Flowchart](./Flowchart/)
-- **Development Schedule**: [Schedule](./Schedule/)
-
----
-
 ## Tips for Success
 
 **Do:**
