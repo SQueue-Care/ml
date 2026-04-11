@@ -8,7 +8,6 @@ Welcome to the **Smart Healthcare Queue System** project! This document outlines
 - [Contributing Workflow](#contributing-workflow)
 - [Development Setup](#development-setup)
 - [Code Standards](#code-standards)
-- [Testing](#testing)
 - [Commit Guidelines](#commit-guidelines)
 - [Pull Request Process](#pull-request-process)
 - [Issue Management](#issue-management)
@@ -118,18 +117,6 @@ Follow the **Development Setup** section below to:
 ### Step 5: Test Your Changes
 
 ```bash
-# Run all tests
-npm test          # Frontend tests
-python -m pytest  # Backend tests
-
-# Run linting
-npm run lint      # Frontend linting
-flake8 src/      # Backend linting
-
-# Manual testing (if applicable)
-# - Test in local environment
-# - Use Postman for API endpoints
-# - Create test cases
 ```
 
 ### Step 6: Commit Your Changes
@@ -198,7 +185,7 @@ git push origin feature/queue-optimization
 
 Once approved:
 1. Maintainer will **merge your PR**
-3. **Celebrate your contribution!** 🎉
+3. **Celebrate your contribution!** 
 
 ---
 
@@ -208,20 +195,14 @@ Once approved:
 
 **Frontend:**
 ```bash
-cd frontend
-npm install
 ```
 
 **Backend:**
 ```bash
-cd backend
-pip install -r requirements.txt
 ```
 
 **ML Model (optional):**
 ```bash
-cd ml
-pip install -r requirements.txt
 ```
 
 ### 2. Environment Configuration
@@ -230,68 +211,44 @@ Create `.env` files in each directory:
 
 **Frontend (.env):**
 ```
-REACT_APP_API_URL=http://localhost:5000/api
-REACT_APP_ML_API_URL=http://localhost:8000/api
 ```
 
 **Backend (.env):**
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/hospital_queue
-JWT_SECRET=your_jwt_secret_key
-ML_API_URL=http://localhost:8000/api
-BPJS_API_URL=https://bpjs-mock-api.example.com
 ```
 
 **ML Model (.env):**
 ```
-MODEL_PORT=8000
-DATABASE_URL=postgresql://user:password@localhost:5432/hospital_queue
 ```
 
 ### 3. Database Setup
 
-**Local PostgreSQL:**
+**Local:**
 ```bash
-# Create database
-createdb hospital_queue
-
-# Run migrations (backend)
-cd backend
-python manage.py migrate
 ```
 
 **Cloud Setup (Supabase/Neon):**
-- Follow documentation at [Supabase](https://supabase.com) or [Neon](https://neon.tech)
 - Set `DATABASE_URL` in `.env`
 
 ### 4. Run Development Servers
 
-**Terminal 1 - Frontend:**
+**Frontend:**
 ```bash
-cd frontend
-npm start
-# Runs on http://localhost:3000
 ```
 
-**Terminal 2 - Backend:**
+**Backend:**
 ```bash
-cd backend
-python manage.py runserver
-# Runs on http://localhost:5000
 ```
 
-**Terminal 3 - ML Model:**
+**ML:**
 ```bash
-cd ml
-python app.py
-# Runs on http://localhost:8000
 ```
 
 ### 5. Verify Setup
 
-- Frontend: Visit http://localhost:3000
-- Backend API: Visit http://localhost:5000/api/health
-- ML API: Visit http://localhost:8000/api/health
+- Frontend:
+- Backend API:
+- ML API:
 
 ---
 
@@ -323,22 +280,9 @@ const PatientQueueCard = ({ queueNumber, estimatedWaitTime }) => {
 // One component per file unless very small
 ```
 
-### Backend (Python/FastAPI)
+### Backend
 ```python
 # Good: Clear function name, type hints, docstring
-def calculate_estimated_wait_time(queue_length: int, avg_service_time: float) -> float:
-    """
-    Calculate estimated wait time for a patient.
-    
-    Args:
-        queue_length: Number of patients in queue
-        avg_service_time: Average service time in minutes
-        
-    Returns:
-        Estimated wait time in minutes
-    """
-    return queue_length * avg_service_time
-
 # Use type hints
 # Include docstrings for public functions/classes
 # Keep functions focused on one responsibility
@@ -350,43 +294,6 @@ def calculate_estimated_wait_time(queue_length: int, avg_service_time: float) ->
 # Include model versioning and performance metrics
 # Use clear variable names for model parameters
 ```
-
----
-
-## Testing
-
-### Frontend Testing
-```bash
-cd frontend
-
-# Run tests
-npm test
-
-# Run with coverage
-npm test -- --coverage
-
-# E2E testing (if applicable)
-npm run test:e2e
-```
-
-### Backend Testing
-```bash
-cd backend
-
-# Run all tests
-python -m pytest
-
-# Run with coverage
-python -m pytest --cov=.
-
-# Run specific test
-python -m pytest tests/test_queue.py
-```
-
-### Test Structure
-- **Unit Tests**: Test individual functions/methods
-- **Integration Tests**: Test multiple components working together
-- **E2E Tests** (optional): Test full user workflows
 
 ---
 
@@ -549,11 +456,6 @@ Use these labels to categorize your work by team/area:
 3. **Ask in issue comments** or create a discussion
 4. **Reach out to maintainers** via GitHub
 
-### Response Time
-- Issues: 2-3 days
-- PR reviews: 3-5 days
-- Discussions: Best effort
-
 ### Code of Conduct
 - Be respectful and inclusive
 - Provide constructive feedback
@@ -650,8 +552,8 @@ SQueue-Care Organization (https://github.com/SQueue-Care)
 
 ---
 
-## Thank You! 🙏
+## Thank You! 
 
-Your contributions make this project better. We appreciate your time and effort in making the Smart Healthcare Queue System a reality. If you have questions or suggestions about this contributing guide, please open an issue or reach out to maintainers.
+Your contributions make this project better. We appreciate your time and effort in making the Smart Healthcare Queue System a reality. If you have questions or suggestions about this contributing guide, please open an issue or reach out to others team members.
 
 **Happy coding!**
