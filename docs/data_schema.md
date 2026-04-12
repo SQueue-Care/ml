@@ -14,6 +14,7 @@ The dataset is designed to capture temporal, operational, and service-related fa
 
 ### Core Features:
 
+* **doctor_id**: Unique identifier for the service provider (doctor)
 * **date**: Full date of visit (YYYY-MM-DD)
 * **day**: Day of the week (Monday–Sunday)
 * **hour**: Hour of arrival (0–23)
@@ -26,6 +27,11 @@ The dataset is designed to capture temporal, operational, and service-related fa
 ## 3. Feature Categorization
 
 To improve model interpretability and performance, features are categorized as follows:
+
+###  Provider Features
+- doctor_id
+
+This feature represents the individual service provider. Different doctors may have different service speeds, which significantly impacts patient waiting time.
 
 ###  Temporal Features
 
@@ -74,12 +80,15 @@ Example:
 * sin(hour), cos(hour)
 * sin(day), cos(day)
 
+Doctor-based patterns may also be analyzed to capture service variability between providers.
+
 ---
 
 ## 5. Data Types & Representation
 
 | Feature            | Type        | Description                        |
 | ------------------ | ----------- | ---------------------------------- |
+| doctor_id          | Categorical | Encoded (One-Hot / Label Encoding) |
 | hour               | Numerical   | Integer (0–23)                     |
 | day                | Categorical | Encoded (One-Hot / Label Encoding) |
 | number_of_patients | Numerical   | Integer                            |
