@@ -8,7 +8,7 @@ ML Service ini menyediakan endpoint prediksi waktu tunggu berbasis machine learn
 - **Numerical Features**: umur, jumlah antrian, jam kedatangan, peak hour indicator, durasi registrasi
 - **Categorical Features**: jenis kelamin, asuransi, status pasien, prioritas, poli, hari
 
-## 🏗️ Arsitektur Model
+## Arsitektur Model
 
 ```
 Input Features
