@@ -26,10 +26,18 @@ def predict_wait_time():
         from datetime import datetime
 
         # Get query parameters
-        department_id = request.args.get('departmentId', type=int)
+        department_id_param = request.args.get('departmentId')
 
-        if department_id is None:
+        if not department_id_param:
             return jsonify({'error': 'Missing departmentId parameter'}), 400
+
+        # Convert departmentId to integer hash for the model
+        # Handle both UUID strings and integer IDs
+        try:
+            department_id = int(department_id_param)
+        except ValueError:
+            # If it's a UUID string, hash it to get a stable integer
+            department_id = hash(department_id_param) % 5
 
         # Default values untuk numeric features
         now = datetime.now()
