@@ -1,3 +1,11 @@
 .DS_Store
 database_schema.md
 PRD.md
+.pixi
+pixi.lock
+pixi.toml
+test.venv
+.vscode
+# pixi environments
+.pixi/*
+!.pixi/config.toml
