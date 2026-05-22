@@ -1,346 +1,168 @@
-# Smart Queue ML Service
+# SmartQueue AI — Prediksi Waktu Tunggu Pasien Rumah Sakit
 
-Predict queue wait times menggunakan Deep Learning Neural Network untuk sistem manajemen antrian rumah sakit.
+Repositori ini memuat *Capstone Project* untuk memprediksi waktu tunggu pasien rumah sakit. Proyek ini mengimplementasikan algoritma Deep Learning menggunakan arsitektur custom dengan framework TensorFlow/Keras, yang kemudian di-deploy sebagai REST API menggunakan FastAPI.
 
-## Overview
+## Fitur Utama (Capstone Criteria)
 
-ML Service ini menyediakan endpoint prediksi waktu tunggu berbasis machine learning untuk pasien di rumah sakit. Model menggunakan kombinasi:
-- **Numerical Features**: umur, jumlah antrian, jam kedatangan, peak hour indicator, durasi registrasi
-- **Categorical Features**: jenis kelamin, asuransi, status pasien, prioritas, poli, hari
+Proyek ini telah memenuhi seluruh kriteria kelulusan utama (Main Quest) dan opsional (Side Quest):
 
-## Arsitektur Model
+### Kriteria Utama (Main Quest)
+1. **Model Deep Learning:** Dibangun menggunakan Keras Functional API.
+2. **Custom Layer (`ResidualDenseBlock`):** Mengimplementasikan *skip connections* untuk mengalirkan informasi tanpa modifikasi (mengadaptasi arsitektur ResNet) guna mencegah *vanishing gradient*.
+3. **Custom Loss (`WeightedHuberLoss`):** Fungsi loss asimetris yang memberikan penalti 1.1x lebih berat untuk *under-prediction* (dalam konteks rumah sakit, memprediksi waktu tunggu lebih lambat dinilai lebih aman daripada terlalu cepat).
+4. **Custom Callback (`DetailedTrainingLogger`):** Menyimpan seluruh metrik per epoch secara otomatis ke dalam format JSON (`training_log.json`).
+5. **Model Export & Inference:** Model disimpan sebagai `best_model.keras` dan diuji secara langsung pada bagian akhir notebook.
 
-```
-Input Features
-    ↓
-[Embedding Layers] → Categorical encoding
-[Scaler] → Numerical normalization
-    ↓
-Concatenate
-    ↓
-Dense(128) + BatchNorm + Dropout(0.2)
-Dense(64) + BatchNorm + Dropout(0.1)
-Dense(32)
-    ↓
-Dense(1, linear) → Output (wait minutes)
-```
+### Kriteria Opsional (Side Quest)
+1. **REST API (FastAPI):** Aplikasi telah di-deploy secara lokal dengan menyediakan endpoint `/predict`.
+2. **Custom Training Loop (`tf.GradientTape`):** Mendemonstrasikan pelatihan dengan kontrol penuh (pengaturan manual *forward* dan *backward pass*) di dalam notebook.
+3. **TensorBoard Integration:** Callback TensorBoard aktif selama masa *training*, dan log interaktif disematkan langsung di dalam notebook menggunakan `%tensorboard`.
+4. **Kinerja Unggul:**
+   - R² Score: **> 95%** (Syarat kelulusan: ≥ 85%)
+   - Normalized MAE: **~0.0309** (mewakili margin error murni sekitar 2.6 menit dari rentang target 0-87 menit, memiliki performa yang setara dengan algoritma *state-of-the-art* tabular seperti XGBoost).
+5. **Visualisasi Komprehensif:** Terdapat visualisasi detail untuk kurva *training*, perbandingan antar model, distribusi error, diagram arsitektur model, hingga analisis fitur yang paling berpengaruh (*Feature Importance*).
 
 ---
 
-## Quick Start
+## Struktur Direktori
 
-### Prerequisites
-
-- **Python**: 3.11 atau lebih tinggi
-- **pip**: Package manager
-- **virtualenv** (recommended): `pip install virtualenv`
-
-### Check Python Version
-```bash
-python --version
-# atau
-python3 --version
+```text
+smartqueue_project/
+├── app/
+│   ├── __init__.py
+│   ├── app.py                        # REST API utama (prediksi waktu tunggu + routing)
+│   ├── config.py                     # Konfigurasi terpusat (API keys, env vars)
+│   └── cdss/                         # Modul CDSS (Clinical Decision Support System)
+│       ├── __init__.py
+│       ├── router.py                 # Endpoint /cdss/recommend & /cdss/health
+│       ├── schemas.py                # Pydantic models request/response CDSS
+│       ├── prompt.py                 # Prompt template untuk Gemini API
+│       └── service.py                # Logic integrasi Gemini API
+├── datasets/
+│   └── dataset_RS2_final.csv         # Dataset utama (telah diproses)
+├── deployment/
+│   └── model/
+│       ├── best_model.keras          # Model Deep Learning terbaik yang diekspor
+│       ├── feature_scaler.save       # Scaler fitur (StandardScaler)
+│       ├── target_scaler.save        # Scaler target (MinMaxScaler)
+│       ├── feature_columns.pkl       # Daftar dan urutan kolom fitur
+│       ├── training_log.json         # Log pelatihan model (Custom Callback)
+│       └── *.png                     # Output visualisasi grafik dari notebook
+├── logs/
+│   └── fit/                          # TensorBoard event logs
+├── notebooks/
+│   └── RS2_final_Custom_Model_dan_Custom_Training.ipynb  # NOTEBOOK UTAMA
+├── .env                              # Environment variables (API keys, TIDAK di-commit)
+├── .gitignore
+├── requirements.txt
+└── README.md
 ```
 
-### Installation Steps
-```bash
-# 1. Navigate ke ml directory
-cd ml/
+> **Catatan:** File-file eksperimen lama berukuran besar dan model *legacy* telah dipindahkan ke folder backup yang diabaikan (*ignored*) oleh Git agar ukuran repositori tetap ringan dan profesional.
 
-# 2. Create virtual environment
+---
+
+## Cara Menjalankan Aplikasi
+
+### 1. Instalasi Environment
+Sangat direkomendasikan untuk menggunakan *Virtual Environment*.
+```bash
 python -m venv venv
-source venv/bin/activate  # macOS/Linux
-# atau
-venv\Scripts\activate  # Windows
+source venv/bin/activate  # Untuk pengguna Mac/Linux
+# venv\Scripts\activate   # Untuk pengguna Windows
 
-# 3. Upgrade pip
-pip install --upgrade pip
-
-# 4. Install dependencies
 pip install -r requirements.txt
-
-# 5. Verify installation
-python -c "import tensorflow; print(f'TensorFlow: {tensorflow.__version__}')"
 ```
 
-### Verify Installation
-
+### 2. Menjalankan REST API (FastAPI Server)
+Pastikan terminal berada di *root* direktori proyek, kemudian jalankan Uvicorn:
 ```bash
-# 1. Check Python
-python --version
-
-# 2. Check TensorFlow
-python -c "import tensorflow as tf; print(f'TensorFlow: {tf.__version__}')"
-
-# 3. Check model files
-ls model_artifacts/
-# Should show:
-# - smart_queue_model.keras
-# - scaler.joblib
-# - encoder.joblib
+uvicorn app.app:app --reload
 ```
+API akan berjalan di `http://127.0.0.1:8000`.
 
----
+### 3. Menguji API
+Buka dokumentasi interaktif Swagger UI pada browser untuk melakukan pengujian langsung:
+**http://127.0.0.1:8000/docs**
 
-## Running the Service
-
-### Development Mode (with debug)
-```bash
-cd ml/
-python app.py
-```
-Service berjalan di: `http://localhost:8000` (atau :5000 sesuai config)
-
-### Test Service
-```bash
-curl http://localhost:8000/health
-
-# Expected:
-# {"status":"healthy","service":"smart-queue-predictor"}
-```
-
----
-
-## API Endpoints
-
-### 1. Health Check
-**GET** `/health`
-
-```bash
-curl http://localhost:8000/health
-```
-
-Response:
+**Contoh Request Payload (JSON):**
 ```json
 {
-  "status": "healthy",
-  "service": "smart-queue-predictor"
+  "umur": 35,
+  "jumlah_antrian": 20,
+  "jam_kedatangan": 9,
+  "asuransi": "BPJS",
+  "prioritas": "Sedang",
+  "status_pasien": "Rawat Jalan",
+  "nama_poli": "Penyakit Dalam"
 }
 ```
 
+*Sistem backend akan secara otomatis memproses kebutuhan *feature engineering* teknis lainnya (seperti penentuan status `is_peak`, encoding siklus waktu periodik menggunakan nilai sinus/kosinus, dll.) berdasarkan tanggal sistem saat permintaan diterima.*
+
 ---
 
-### 2. Predict Wait Time (Backend Compatible)
+## Fitur Tambahan: CDSS — Clinical Decision Support System
 
-**GET** `/predict/wait-time?departmentId=1&waitingAhead=5&avgServiceMinutes=15`
+Sistem ini dilengkapi fitur **CDSS** untuk membantu dokter mendapatkan rekomendasi kemungkinan penyakit (maksimal 3) beserta saran pemeriksaan lanjutan berdasarkan input gejala pasien. Fitur ini didukung oleh **Google Gemini API** yang telah dioptimasi untuk efisiensi token.
 
-**Query Parameters:**
-- `departmentId` (required, int): Department/Poli ID
-- `waitingAhead` (optional, int): Jumlah pasien di depan (default: 5)
-- `avgServiceMinutes` (optional, int): Waktu layanan rata-rata (default: 15)
+### Keunggulan Sistem CDSS Kami
+- **Token Efficient:** Membatasi output menjadi maksimal 3 penyakit teratas dan penjelasan singkat (1-2 kalimat) untuk menghemat penggunaan token/biaya secara signifikan.
+- **Auto Model Fallback:** Sistem tahan banting terhadap error limit/kuota (*Rate Limit 429*). Jika model utama (misal `gemini-2.5-flash`) gagal karena kuota harian, sistem akan **otomatis** dan diam-diam beralih ke model cadangan (`gemini-flash-latest`) sehingga pengguna tidak pernah mengalami *downtime*.
 
-```bash
-curl "http://localhost:8000/predict/wait-time?departmentId=1"
-```
+### Setup Lingkungan (Environment)
 
-Response:
+1. Kunjungi [Google AI Studio](https://aistudio.google.com/apikey) dan buat API key gratis.
+2. Konfigurasikan `.env` di root project seperti berikut:
+   ```env
+   GEMINI_API_KEY=your_actual_api_key_here
+   GEMINI_MODEL=gemini-2.5-flash
+   ```
+
+### Endpoint CDSS
+
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| `POST` | `/cdss/recommend` | Rekomendasi penyakit dan penunjang diagnostik |
+| `GET` | `/cdss/health` | Status konektivitas dengan server Google Gemini |
+
+**Contoh Request Payload CDSS (JSON):**
 ```json
 {
-  "estimatedMinutes": 19,
-  "modelVersion": "1.0",
-  "source": "ml-service",
-  "waitingAhead": 5,
-  "avgServiceMinutes": 15
+  "gejala": "demam tinggi sudah 3 hari, batuk kering, sesak napas, nyeri dada saat bernapas",
+  "umur": 45,
+  "jenis_kelamin": "L"
 }
 ```
 
----
-
-### 3. Single Prediction (POST)
-
-**POST** `/predict`
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{
-    "departmentId": 1,
-    "dayOfWeek": 3,
-    "hour": 10,
-    "waitingAhead": 5,
-    "avgServiceMinutes": 15
-  }'
-```
-
-Response:
+**Contoh Response Payload CDSS (JSON):**
 ```json
 {
-  "estimatedWaitMinutes": 19,
-  "modelVersion": "1.0",
-  "source": "ml-service",
-  "features": {...}
+  "gejala_teridentifikasi": [
+    "demam tinggi", "batuk kering", "sesak napas", "nyeri dada"
+  ],
+  "kandidat_diagnosis": [
+    {
+      "nama_penyakit": "Pneumonia",
+      "tingkat_urgensi": "HIGH",
+      "confidence": 85,
+      "departemen": "PARU",
+      "penjelasan": "Gejala demam tinggi disertai batuk kering dan sesak napas sangat mengarah pada infeksi paru.",
+      "pemeriksaan_lanjutan": ["Rontgen Thorax", "Cek Darah Lengkap"]
+    }
+  ],
+  "catatan_medis": "Segera lakukan observasi saturasi oksigen pasien.",
+  "disclaimer": "Hasil ini merupakan rekomendasi berbasis AI...",
+  "status": "success"
 }
 ```
 
----
-
-### 4. Batch Prediction
-
-**POST** `/batch-predict`
-
-```bash
-curl -X POST http://localhost:8000/batch-predict \
-  -H "Content-Type: application/json" \
-  -d '[
-    {"departmentId": 1, "dayOfWeek": 3, "hour": 10, "waitingAhead": 5, "avgServiceMinutes": 15},
-    {"departmentId": 2, "dayOfWeek": 3, "hour": 14, "waitingAhead": 8, "avgServiceMinutes": 20}
-  ]'
-```
-
-Response:
-```json
-{
-  "predictions": [
-    {"estimatedWaitMinutes": 19},
-    {"estimatedWaitMinutes": 25}
-  ]
-}
-```
+> **⚠️ Disclaimer:** Fitur CDSS merupakan alat bantu berbasis AI dan **BUKAN** pengganti diagnosis medis. Keputusan klinis tetap sepenuhnya berada di tangan dokter yang merawat.
 
 ---
 
-### 5. Service Info
+## Cara Menjalankan Notebook
+Notebook `RS2_final_Custom_Model_dan_Custom_Training.ipynb` dirancang agar dapat dieksekusi secara berurutan dari awal hingga akhir (*Run All*). 
 
-**GET** `/info`
+Pastikan pengaturan **Jupyter Kernel** Anda telah diarahkan ke *virtual environment* (`venv`) proyek ini yang memuat semua pustaka prasyarat (seperti `tensorflow`, `xgboost`, `pandas`). Semua artefak yang dihasilkan dari eksekusi notebook (termasuk model `.keras`, *scalers*, dan output gambar grafik) akan diperbarui secara otomatis dan disalin ke dalam direktori `deployment/model/`.
 
-```bash
-curl http://localhost:8000/info
-```
-
----
-
-## Model Details
-
-### Arsitektur
-- **Input**: 7 inputs (6 categorical + 1 numeric vector)
-- **Embeddings**: Categorical features → dense vectors
-- **Hidden Layers**: 
-  - Dense(128) + BatchNorm + Dropout(0.2)
-  - Dense(64) + BatchNorm + Dropout(0.1)
-  - Dense(32)
-- **Output**: Dense(1, linear)
-
-### Training Specs
-- **Optimizer**: Adam (learning_rate=0.005)
-- **Loss**: Mean Squared Error (MSE)
-- **Metrics**: Mean Absolute Error (MAE)
-- **Callbacks**:
-  - EarlyStopping (patience=15)
-  - ReduceLROnPlateau (factor=0.5, patience=5)
-- **Data Split**: 80% train, 10% val, 10% test
-- **Total Records**: 10,032
-- **Test MAE**: ~2-3 minutes accuracy
-
-### Model Files
-```
-model_artifacts/
-├── smart_queue_model.keras    # Neural Network (259 KB)
-├── scaler.joblib              # StandardScaler untuk numeric features
-├── encoder.joblib             # OrdinalEncoder untuk categorical
-└── metadata.joblib            # Feature metadata
-```
-
----
-
-## Input/Output Format
-
-### Input Features
-
-| Feature | Type | Description |
-|---------|------|-------------|
-| departmentId | int | Department/Poli ID |
-| umur | int | Patient age |
-| jenis_kelamin | categorical | Gender (MALE/FEMALE) |
-| asuransi | categorical | Insurance type |
-| status_pasien | categorical | Patient status (BARU/LAMA) |
-| prioritas | categorical | Priority level |
-| nama_poli | categorical | Department name |
-| hari | int | Day of week (0=Mon, 6=Sun) |
-| jam_kedatangan | int | Hour (0-23) |
-| is_peak | int | Peak hour (9-12, 14-16) |
-| jumlah_antrian | int | Waiting queue count |
-| durasi_registrasi | float | Registration duration (minutes) |
-
-### Output
-
-| Field | Type | Description |
-|-------|------|-------------|
-| estimatedMinutes | int | Predicted wait time (minutes) |
-| modelVersion | string | Model version |
-| source | string | "ml-service" |
-| waitingAhead | int | Queue depth used |
-| avgServiceMinutes | int | Average service time |
-
----
-
-## Integration
-
-### Backend Setup
-
-Configure di backend `.env`:
-```env
-ML_SERVICE_URL=http://localhost:8000
-```
-
-Backend akan otomatis memanggil ML service saat:
-- Queue creation (POST /queues)
-- Predictions endpoint (GET /predictions/wait-time)
-
-### Fallback Mechanism
-
-Jika ML service tidak tersedia, backend pakai heuristik:
-```
-waitTime = waitingAhead × avgServiceMinutes + inProgressBuffer
-```
-
----
-
-## Configuration
-
-### Environment Variables
-```env
-FLASK_ENV=production
-ML_DEBUG=0
-TF_CPP_MIN_LOG_LEVEL=2
-```
-
-### Performance Tuning
-
-**High Traffic:**
-```bash
-gunicorn --bind 0.0.0.0:5000 --workers 8 --timeout 120 app:app
-```
-
-**With Resource Limits:**
-```bash
-gunicorn --bind 0.0.0.0:5000 --workers 4 --max-requests 1000 app:app
-```
----
-
-## Testing
-
-### Using cURL
-```bash
-# Health
-curl http://localhost:8000/health
-
-# Prediction
-curl "http://localhost:8000/predict/wait-time?departmentId=1"
-
-# Batch
-curl -X POST http://localhost:8000/batch-predict \
-  -H "Content-Type: application/json" \
-  -d '[{"departmentId":1,"dayOfWeek":3,"hour":10,"waitingAhead":5,"avgServiceMinutes":15}]'
-```
-
-### Using Python
-```python
-import requests
-
-response = requests.get(
-  "http://localhost:8000/predict/wait-time",
-  params={"departmentId": 1, "waitingAhead": 5}
-)
-print(response.json())
-```
----

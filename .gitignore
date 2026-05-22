@@ -1,11 +1,18 @@
-.DS_Store
-database_schema.md
-PRD.md
-.pixi
+venv/
+test.venv/
+.pixi/
 pixi.lock
-pixi.toml
-test.venv
-.vscode
-# pixi environments
-.pixi/*
-!.pixi/config.toml
+__pycache__/
+*.pyc
+# logs/ — NOT ignored to allow TensorBoard logs in repository
+.DS_Store
+.ipynb_checkpoints/
+.env
+*.log
+.vscode/
+models/
+deployment/model/legacy*/
+
+# Backup folder (not pushed to GitHub)
+backup/
+
