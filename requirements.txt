@@ -1,12 +1,19 @@
+# Web framework
 fastapi
-uvicorn
+uvicorn[standard]
 gunicorn
-tensorflow-cpu
-keras>=3.13.2
+
+# Validasi data
+pydantic
+
+# AI / ML
+google-generativeai
+tensorflow
+keras
+scikit-learn
 pandas
 numpy
-scikit-learn
 joblib
-pydantic
-google-generativeai
+
+# Utilities
 python-dotenv

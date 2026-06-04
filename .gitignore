@@ -1,18 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
 venv/
+.venv/
 test.venv/
 .pixi/
 pixi.lock
-__pycache__/
-*.pyc
-# logs/ — NOT ignored to allow TensorBoard logs in repository
-.DS_Store
-.ipynb_checkpoints/
+
+# Environment variables (sensitive)
 .env
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Logs
 *.log
+
+# IDE
 .vscode/
-models/
-deployment/model/legacy*/
-
-# Backup folder (not pushed to GitHub)
-backup/
-
+.idea/
