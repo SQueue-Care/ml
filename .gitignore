@@ -1,18 +1,29 @@
+# Virtual environments
+ml-smartqueue/
+ml-queue-api/
 venv/
-test.venv/
-.pixi/
-pixi.lock
+env/
+.venv/
+
+# Python cache
 __pycache__/
 *.pyc
-# logs/ — NOT ignored to allow TensorBoard logs in repository
-.DS_Store
+*.pyo
+*.pyd
+
+# Jupyter notebook checkpoints
 .ipynb_checkpoints/
-.env
-*.log
+
+# IDE
 .vscode/
-models/
-deployment/model/legacy*/
+.idea/
 
-# Backup folder (not pushed to GitHub)
-backup/
+# OS
+.DS_Store
+Thumbs.db
 
+# Logs
+*.log
+
+# Model files (besar, simpan di storage terpisah jika perlu)
+# models/  ← uncomment baris ini jika model tidak mau di-push
