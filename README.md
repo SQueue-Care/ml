@@ -1,168 +1,132 @@
-# SmartQueue AI — Prediksi Waktu Tunggu Pasien Rumah Sakit
+# **SmartQueue AI — Machine Learning & CDSS Service**
 
-Repositori ini memuat *Capstone Project* untuk memprediksi waktu tunggu pasien rumah sakit. Proyek ini mengimplementasikan algoritma Deep Learning menggunakan arsitektur custom dengan framework TensorFlow/Keras, yang kemudian di-deploy sebagai REST API menggunakan FastAPI.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-develop-red.svg)
+![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)
 
-## Fitur Utama (Capstone Criteria)
+## **Deskripsi Proyek**
 
-Proyek ini telah memenuhi seluruh kriteria kelulusan utama (Main Quest) dan opsional (Side Quest):
+**SmartQueue AI** adalah layanan *machine learning* berbasis REST API yang dikembangkan sebagai bagian dari **Capstone Project Coding Camp DBS Foundation 2025**. Layanan ini menyediakan dua fitur utama berbasis AI:
 
-### Kriteria Utama (Main Quest)
-1. **Model Deep Learning:** Dibangun menggunakan Keras Functional API.
-2. **Custom Layer (`ResidualDenseBlock`):** Mengimplementasikan *skip connections* untuk mengalirkan informasi tanpa modifikasi (mengadaptasi arsitektur ResNet) guna mencegah *vanishing gradient*.
-3. **Custom Loss (`WeightedHuberLoss`):** Fungsi loss asimetris yang memberikan penalti 1.1x lebih berat untuk *under-prediction* (dalam konteks rumah sakit, memprediksi waktu tunggu lebih lambat dinilai lebih aman daripada terlalu cepat).
-4. **Custom Callback (`DetailedTrainingLogger`):** Menyimpan seluruh metrik per epoch secara otomatis ke dalam format JSON (`training_log.json`).
-5. **Model Export & Inference:** Model disimpan sebagai `best_model.keras` dan diuji secara langsung pada bagian akhir notebook.
+1. **Prediksi Waktu Tunggu Pasien** — model *deep learning* yang memproyeksikan estimasi waktu tunggu berdasarkan kondisi antrian dan profil pasien.
+2. **Clinical Decision Support System (CDSS)** — sistem rekomendasi diagnosis yang menganalisis gejala klinis dan memberikan kandidat penyakit beserta saran pemeriksaan lanjutan, didukung oleh **Google Gemini AI**.
 
-### Kriteria Opsional (Side Quest)
-1. **REST API (FastAPI):** Aplikasi telah di-deploy secara lokal dengan menyediakan endpoint `/predict`.
-2. **Custom Training Loop (`tf.GradientTape`):** Mendemonstrasikan pelatihan dengan kontrol penuh (pengaturan manual *forward* dan *backward pass*) di dalam notebook.
-3. **TensorBoard Integration:** Callback TensorBoard aktif selama masa *training*, dan log interaktif disematkan langsung di dalam notebook menggunakan `%tensorboard`.
-4. **Kinerja Unggul:**
-   - R² Score: **> 95%** (Syarat kelulusan: ≥ 85%)
-   - Normalized MAE: **~0.0309** (mewakili margin error murni sekitar 2.6 menit dari rentang target 0-87 menit, memiliki performa yang setara dengan algoritma *state-of-the-art* tabular seperti XGBoost).
-5. **Visualisasi Komprehensif:** Terdapat visualisasi detail untuk kurva *training*, perbandingan antar model, distribusi error, diagram arsitektur model, hingga analisis fitur yang paling berpengaruh (*Feature Importance*).
+## **Fitur Utama**
 
----
+- 🧠 **Prediksi Waktu Tunggu (Deep Learning):** Model *neural network* dengan arsitektur *Residual Dense Block* yang memprediksi waktu tunggu pasien secara real-time berdasarkan jumlah antrian, poli, jam kedatangan, dan faktor lainnya.
+- 🩺 **CDSS berbasis Gemini AI:** Analisis gejala pasien dan menghasilkan hingga 3 kandidat diagnosis dengan tingkat urgensi, *confidence score*, departemen rujukan, dan pemeriksaan lanjutan yang direkomendasikan.
+- ⚡ **Auto Model Fallback:** Sistem tahan banting terhadap batas kuota Gemini API — jika model utama gagal, sistem otomatis beralih ke model cadangan tanpa *downtime*.
+- 🔌 **REST API siap integrasi:** Dibangun dengan FastAPI, dilengkapi dokumentasi Swagger interaktif dan CORS support.
 
-## Struktur Direktori
+## **Arsitektur & Teknologi**
 
-```text
-smartqueue_project/
-├── app/
-│   ├── __init__.py
-│   ├── app.py                        # REST API utama (prediksi waktu tunggu + routing)
-│   ├── config.py                     # Konfigurasi terpusat (API keys, env vars)
-│   └── cdss/                         # Modul CDSS (Clinical Decision Support System)
-│       ├── __init__.py
-│       ├── router.py                 # Endpoint /cdss/recommend & /cdss/health
-│       ├── schemas.py                # Pydantic models request/response CDSS
-│       ├── prompt.py                 # Prompt template untuk Gemini API
-│       └── service.py                # Logic integrasi Gemini API
-├── datasets/
-│   └── dataset_RS2_final.csv         # Dataset utama (telah diproses)
-├── deployment/
-│   └── model/
-│       ├── best_model.keras          # Model Deep Learning terbaik yang diekspor
-│       ├── feature_scaler.save       # Scaler fitur (StandardScaler)
-│       ├── target_scaler.save        # Scaler target (MinMaxScaler)
-│       ├── feature_columns.pkl       # Daftar dan urutan kolom fitur
-│       ├── training_log.json         # Log pelatihan model (Custom Callback)
-│       └── *.png                     # Output visualisasi grafik dari notebook
-├── logs/
-│   └── fit/                          # TensorBoard event logs
-├── notebooks/
-│   └── RS2_final_Custom_Model_dan_Custom_Training.ipynb  # NOTEBOOK UTAMA
-├── .env                              # Environment variables (API keys, TIDAK di-commit)
-├── .gitignore
-├── requirements.txt
-└── README.md
-```
+**Tech Stack yang Digunakan:**
 
-> **Catatan:** File-file eksperimen lama berukuran besar dan model *legacy* telah dipindahkan ke folder backup yang diabaikan (*ignored*) oleh Git agar ukuran repositori tetap ringan dan profesional.
+- **API Framework:** Python, FastAPI, Uvicorn, Gunicorn
+- **Deep Learning:** TensorFlow 2.x, Keras
+- **ML Utilities:** Scikit-learn, Pandas, NumPy, Joblib
+- **AI / LLM:** Google Gemini API (`google-generativeai`)
+- **Deployment:** Cloud VPS / Azure App Service
+- **Tools:** Git, GitHub, Postman
 
----
+## **Panduan Instalasi & Setup**
 
-## Cara Menjalankan Aplikasi
+**Prasyarat:**
+- [Python](https://www.python.org/) versi **3.11** (TensorFlow tidak kompatibel dengan Python 3.13+)
+- [Git](https://git-scm.com/)
+- [Conda](https://docs.conda.io/) *(direkomendasikan)* atau `venv`
 
-### 1. Instalasi Environment
-Sangat direkomendasikan untuk menggunakan *Virtual Environment*.
-```bash
-python -m venv venv
-source venv/bin/activate  # Untuk pengguna Mac/Linux
-# venv\Scripts\activate   # Untuk pengguna Windows
+**Langkah-langkah:**
 
-pip install -r requirements.txt
-```
+1. **Clone repositori ini:**
+   ```bash
+   git clone <url-repo-ini>
+   cd ml
+   ```
 
-### 2. Menjalankan REST API (FastAPI Server)
-Pastikan terminal berada di *root* direktori proyek, kemudian jalankan Uvicorn:
-```bash
-uvicorn app.app:app --reload
-```
-API akan berjalan di `http://127.0.0.1:8000`.
+2. **Setup environment Python:**
+   ```bash
+   # Opsi A — conda (direkomendasikan)
+   conda create -n smartqueue python=3.11
+   conda activate smartqueue
 
-### 3. Menguji API
-Buka dokumentasi interaktif Swagger UI pada browser untuk melakukan pengujian langsung:
-**http://127.0.0.1:8000/docs**
+   # Opsi B — venv
+   python -m venv venv
+   source venv/bin/activate   # Mac/Linux
+   # venv\Scripts\activate    # Windows
 
-**Contoh Request Payload (JSON):**
-```json
-{
-  "umur": 35,
-  "jumlah_antrian": 20,
-  "jam_kedatangan": 9,
-  "asuransi": "BPJS",
-  "prioritas": "Sedang",
-  "status_pasien": "Rawat Jalan",
-  "nama_poli": "Penyakit Dalam"
-}
-```
+   pip install -r requirements.txt
+   ```
 
-*Sistem backend akan secara otomatis memproses kebutuhan *feature engineering* teknis lainnya (seperti penentuan status `is_peak`, encoding siklus waktu periodik menggunakan nilai sinus/kosinus, dll.) berdasarkan tanggal sistem saat permintaan diterima.*
+3. **Konfigurasi environment variable:**
 
----
-
-## Fitur Tambahan: CDSS — Clinical Decision Support System
-
-Sistem ini dilengkapi fitur **CDSS** untuk membantu dokter mendapatkan rekomendasi kemungkinan penyakit (maksimal 3) beserta saran pemeriksaan lanjutan berdasarkan input gejala pasien. Fitur ini didukung oleh **Google Gemini API** yang telah dioptimasi untuk efisiensi token.
-
-### Keunggulan Sistem CDSS Kami
-- **Token Efficient:** Membatasi output menjadi maksimal 3 penyakit teratas dan penjelasan singkat (1-2 kalimat) untuk menghemat penggunaan token/biaya secara signifikan.
-- **Auto Model Fallback:** Sistem tahan banting terhadap error limit/kuota (*Rate Limit 429*). Jika model utama (misal `gemini-2.5-flash`) gagal karena kuota harian, sistem akan **otomatis** dan diam-diam beralih ke model cadangan (`gemini-flash-latest`) sehingga pengguna tidak pernah mengalami *downtime*.
-
-### Setup Lingkungan (Environment)
-
-1. Kunjungi [Google AI Studio](https://aistudio.google.com/apikey) dan buat API key gratis.
-2. Konfigurasikan `.env` di root project seperti berikut:
+   Buat file `.env` di root proyek:
    ```env
-   GEMINI_API_KEY=your_actual_api_key_here
+   GEMINI_API_KEY=isi_dengan_api_key_asli
    GEMINI_MODEL=gemini-2.5-flash
    ```
 
-### Endpoint CDSS
+   > Dapatkan API key gratis di [Google AI Studio](https://aistudio.google.com/apikey).
+
+## **Menjalankan Aplikasi**
+
+```bash
+uvicorn app.app:app --reload
+```
+
+- API berjalan di: `http://127.0.0.1:8000`
+- Dokumentasi Swagger: `http://127.0.0.1:8000/docs`
+
+## **Endpoint API**
 
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
-| `POST` | `/cdss/recommend` | Rekomendasi penyakit dan penunjang diagnostik |
-| `GET` | `/cdss/health` | Status konektivitas dengan server Google Gemini |
+| `GET` | `/` | Status API |
+| `GET` | `/health` | Health check (termasuk status model) |
+| `POST` | `/predict/` | Prediksi waktu tunggu pasien |
+| `POST` | `/predict/debug` | Debug nilai fitur yang masuk ke model |
+| `POST` | `/cdss/recommend` | Rekomendasi diagnosis berdasarkan gejala |
+| `GET` | `/cdss/health` | Status konektivitas Gemini API |
 
-**Contoh Request Payload CDSS (JSON):**
+**Contoh Request `/predict/`:**
 ```json
 {
-  "gejala": "demam tinggi sudah 3 hari, batuk kering, sesak napas, nyeri dada saat bernapas",
+  "umur": 45,
+  "jumlah_antrian": 10,
+  "jam_kedatangan": 9,
+  "asuransi": "bpjs",
+  "prioritas": "normal",
+  "nama_poli": "umum",
+  "tanggal": "2025-06-01"
+}
+```
+
+**Contoh Request `/cdss/recommend`:**
+```json
+{
+  "gejala": "demam tinggi sudah 3 hari, batuk kering, sesak napas",
   "umur": 45,
   "jenis_kelamin": "L"
 }
 ```
 
-**Contoh Response Payload CDSS (JSON):**
-```json
-{
-  "gejala_teridentifikasi": [
-    "demam tinggi", "batuk kering", "sesak napas", "nyeri dada"
-  ],
-  "kandidat_diagnosis": [
-    {
-      "nama_penyakit": "Pneumonia",
-      "tingkat_urgensi": "HIGH",
-      "confidence": 85,
-      "departemen": "PARU",
-      "penjelasan": "Gejala demam tinggi disertai batuk kering dan sesak napas sangat mengarah pada infeksi paru.",
-      "pemeriksaan_lanjutan": ["Rontgen Thorax", "Cek Darah Lengkap"]
-    }
-  ],
-  "catatan_medis": "Segera lakukan observasi saturasi oksigen pasien.",
-  "disclaimer": "Hasil ini merupakan rekomendasi berbasis AI...",
-  "status": "success"
-}
-```
+## **Tim Pengembang (CC25-CF042)**
+
+| ID | Nama | Peran | Status |
+|----|------|-------|--------|
+| CFCC223D6Y2279 | Bintang Wishnu Pradana | Full-Stack Web Developer | Aktif |
+| CFCC559D6Y0373 | Muhammad Fais Avriody Daffa | Full-Stack Web Developer | Aktif |
+| CDCC223D6Y0280 | M. Alan Daulay | Data Scientist | Aktif |
+| CDCC223D6Y2250 | Galih Fathurahman Ardiansyah | Data Scientist | Aktif |
+| CACC559D6Y1659 | Khairul Anuar | AI Engineer | Aktif |
+| CACC223D6Y0439 | Sulthon Aqthoris Sama | AI Engineer | Aktif |
+
+---
 
 > **⚠️ Disclaimer:** Fitur CDSS merupakan alat bantu berbasis AI dan **BUKAN** pengganti diagnosis medis. Keputusan klinis tetap sepenuhnya berada di tangan dokter yang merawat.
 
 ---
 
-## Cara Menjalankan Notebook
-Notebook `RS2_final_Custom_Model_dan_Custom_Training.ipynb` dirancang agar dapat dieksekusi secara berurutan dari awal hingga akhir (*Run All*). 
-
-Pastikan pengaturan **Jupyter Kernel** Anda telah diarahkan ke *virtual environment* (`venv`) proyek ini yang memuat semua pustaka prasyarat (seperti `tensorflow`, `xgboost`, `pandas`). Semua artefak yang dihasilkan dari eksekusi notebook (termasuk model `.keras`, *scalers*, dan output gambar grafik) akan diperbarui secara otomatis dan disalin ke dalam direktori `deployment/model/`.
-
+### **Lisensi**
+Proyek ini dilisensikan di bawah [Lisensi MIT](./LICENSE).
