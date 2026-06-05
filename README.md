@@ -22,6 +22,8 @@ Proyek ini telah memenuhi seluruh kriteria kelulusan utama (Main Quest) dan opsi
    - Normalized MAE: **~0.0309** (mewakili margin error murni sekitar 2.6 menit dari rentang target 0-87 menit, memiliki performa yang setara dengan algoritma *state-of-the-art* tabular seperti XGBoost).
 5. **Visualisasi Komprehensif:** Terdapat visualisasi detail untuk kurva *training*, perbandingan antar model, distribusi error, diagram arsitektur model, hingga analisis fitur yang paling berpengaruh (*Feature Importance*).
 
+Link model Ai : https://drive.google.com/drive/folders/1N48kWDc9rZ1_6FGKqeHNw5USVE4DrLY5?usp=sharing
+
 ---
 
 ## Struktur Direktori
