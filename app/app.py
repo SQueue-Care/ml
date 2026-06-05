@@ -4,9 +4,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
+startup_error: str = ""
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load model prediksi waktu tunggu saat startup."""
+    global startup_error
     from app.predict.model import load_model
     from app.predict.router import init_model
 
@@ -16,6 +20,7 @@ async def lifespan(app: FastAPI):
         init_model(model, scaler)
         print(f"[startup] Model loaded  : input_shape={model.input_shape}")
     except Exception as e:
+        startup_error = str(e)
         print(f"[startup] WARNING: Model gagal dimuat — {e}")
         print("[startup] Endpoint /predict tidak akan berfungsi.")
 
@@ -67,5 +72,6 @@ def health_check():
     return {
         "status": "healthy",
         "model_loaded": state.model is not None,
+        "model_error": startup_error if startup_error else None,
         "version": "5.0",
     }
