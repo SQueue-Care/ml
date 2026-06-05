@@ -10,7 +10,7 @@ st.set_page_config(page_title="Dashboard Insight RS", layout="wide")
 @st.cache_data
 def load_data():
     # Menggunakan path relatif 'data/' sesuai dengan struktur folder di repositori GitHub kamu
-    df = pd.read_csv('data/dataset_RS_clean.csv')
+    df = pd.read_csv('dataset_RS_clean.csv')
     df['waktu_kedatangan'] = pd.to_datetime(df['waktu_kedatangan'])
     df['jam'] = df['waktu_kedatangan'].dt.hour
     return df
