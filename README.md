@@ -30,6 +30,8 @@
 - **Deployment:** Cloud VPS / Azure App Service
 - **Tools:** Git, GitHub, Postman
 
+Link Model Ai : https://drive.google.com/drive/folders/1N48kWDc9rZ1_6FGKqeHNw5USVE4DrLY5?usp=drive_link
+
 ## **Panduan Instalasi & Setup**
 
 **Prasyarat:**
